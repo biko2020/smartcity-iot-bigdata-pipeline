@@ -70,6 +70,9 @@ smartcity-iot-bigdata-pipeline/
 ├── spark/
 │   └── streaming_job.py            # Spark Structured Streaming
 │
+├── superset/
+│   └── dashboards/
+│
 ├── scripts/
 │   └── load_postgres.py            # KPIs from Parquet → PostgreSQL
 │
