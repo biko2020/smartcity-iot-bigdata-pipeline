@@ -60,27 +60,22 @@ This pipeline enables:
 
 smartcity-iot-bigdata-pipeline/
 │
-├── data/
-│   ├── raw/                        # Raw ingested data
-│   └── processed/                  # Cleaned & aggregated Parquet
-│
-├── scripts/                        # Batch ETL logic
-│   ├── extract.py                  # Data ingestion (API / batch)
-│   ├── transform.py                # PySpark transformations
-│   └── load.py                     # Load to PostgreSQL
+├── data/                           # Data Lake (mounted volume)
+│   ├── raw/                        # Kafka landing (optional)
+│   └── processed/                  # Parquet from Spark Streaming
 │
 ├── kafka/
-│   └── producer_iot.py             # Real-time IoT producer
+│   └── producer_iot.py             # IoT / sensor simulator
 │
 ├── spark/
 │   └── streaming_job.py            # Spark Structured Streaming
 │
+├── scripts/
+│   └── load_postgres.py            # KPIs from Parquet → PostgreSQL
+│
 ├── airflow/
 │   └── dags/
-│       └── smartcity_etl_dag.py    # Automated pipeline (DAG)
-│
-├── superset/
-│   └── dashboards/                 # BI dashboards
+│       └── smartcity_pipeline.py   # Orchestration
 │
 ├── docker/
 │   ├── Dockerfile.spark
@@ -104,13 +99,32 @@ Parquet Data Lake
 
 ---
 
+## requirements.txt
+
+# Spark
+pyspark==3.4.1
+
+# Kafka
+kafka-python>=2.0
+
+# Analytics / KPIs
+pandas>=2.0
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+
+# Utils
+python-dotenv>=1.0
+
+
+---
+
 ## How to Run the Project
 
 1️⃣ Start the environment
 	docker compose up -d
 
 2️⃣ Run batch ETL (optional)
-	docker exec -it spark python3 /app/scripts/extract.py
+    docker exec -it spark python3 /app/scripts/extract.py
 	docker exec -it spark spark-submit /app/scripts/transform.py
 	docker exec -it spark python3 /app/scripts/load.py
 
