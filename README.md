@@ -1,63 +1,75 @@
-# SmartCity IoT Big Data Pipeline (Real-Time & Batch)
+🏙️ SmartCity IoT Big Data Pipeline
 
-End-to-end **Big Data Engineering project** designed to ingest, process, store and visualize **real-time IoT data** using modern, production-grade technologies.
+Production-grade real-time data platform for Smart Cities & Industry 4.0
 
-This project demonstrates how to build a **scalable, containerized data platform** suitable for Smart Cities, Industry 4.0, and real-time analytics use cases.
+A complete end-to-end Big Data streaming solution showcasing modern data engineering practices: real-time ingestion, distributed stream processing, analytics-ready storage, and BI visualization — all containerized and production-oriented.
 
----
 
-##  Business Use Case
 
-Smart cities generate massive volumes of IoT data (air quality, traffic, temperature, sensors).  
+
+
+
+
+
+📊 Business Value
+
+Smart cities and IoT platforms generate continuous high-velocity data streams from sensors monitoring traffic, air quality, temperature, noise, and infrastructure usage.
+
 This pipeline enables:
 
-- Real-time ingestion of IoT events
-- Large-scale processing with Spark
-- Reliable storage in Data Lake and PostgreSQL
-- Automated orchestration with Airflow
-- Interactive dashboards with Superset
+✅ Real-time ingestion of IoT events
+✅ Scalable stream processing with Spark Structured Streaming
+✅ Reliable data lake storage using Parquet
+✅ Analytics-ready PostgreSQL warehouse
+✅ Business dashboards for operational insights
+✅ Automated orchestration & monitoring
 
----
+Target Use Cases:
+Smart Cities • Industry 4.0 • Environmental Monitoring • Traffic Analytics • Predictive Maintenance
 
-## Architecture Overview
+🏗️ Architecture
+┌─────────────────────────────┐
+│   IoT Sensors / APIs        │
+└──────────┬──────────────────┘
+           │
+    ┌──────▼──────────────┐
+    │   Apache Kafka      │  ← Real-time ingestion
+    └──────┬──────────────┘
+           │
+    ┌──────▼──────────────┐
+    │ Spark Structured    │  ← Stream processing
+    │    Streaming        │
+    └──────┬──────────────┘
+           │
+    ┌──────▼──────────────┐
+    │ Parquet Data Lake   │  ← Scalable storage
+    └──────┬──────────────┘
+           │
+    ┌──────▼──────────────┐
+    │ PostgreSQL          │  ← Analytics / KPIs
+    └──────┬──────────────┘
+           │
+    ┌──────▼──────────────┐
+    │ Apache Superset     │  ← BI Dashboards
+    └──────┬──────────────┘
+           │
+    ┌──────▼──────────────┐
+    │ Apache Airflow     │  ← Orchestration
+    └─────────────────────┘
 
-    ┌─────────────────────────────┐
-    │   IoT Sensors / APIs        │ ← Data Sources
-    └──────────┬──────────────────┘
-               │
-        ┌──────▼──────────────┐
-        │   Apache Kafka      │ ← Real-Time Ingestion
-        └──────┬──────────────┘
-               │
-        ┌──────▼──────────────┐
-        │ Spark Structured    │ ← Stream Processing
-        │    Streaming        │
-        └──────┬──────────────┘
-               │
-        ┌──────▼──────────────┐
-        │   Parquet Data      │ ← Storage Layer
-        │      Lake           │
-        └──────┬──────────────┘
-               │
-        ┌──────▼──────────────┐
-        │   PostgreSQL        │ ← Analytics & KPIs
-        │  (OLAP/Analytics)   │
-        └──────┬──────────────┘
-               │
-        ┌──────▼──────────────┐
-        │  Superset           │ ← Visualization & BI
-        │   Dashboards        │
-        └──────┬──────────────┘
-               │
-        ┌──────▼──────────────┐
-        │  Apache Airflow     │ ← Orchestration & Monitoring
-        │ (Orchestration)     │
-        └─────────────────────┘
+Design Principles
 
----
+Streaming-first architecture
 
-## Project Structure
+Fault-tolerant (Spark checkpoints)
 
+Horizontally scalable
+
+Cloud-agnostic (AWS / GCP / Azure / on-prem)
+
+Production-ready containerization
+
+📁 Project Structure
 smartcity-iot-bigdata-pipeline/
 │
 ├── data/                           # Data Lake (mounted volume)
@@ -87,94 +99,119 @@ smartcity-iot-bigdata-pipeline/
 ├── requirements.txt
 └── README.md
 
----
 
-## Technology Stack
+🛠️ Technology Stack
+Layer	Technology
+Language	Python 3.10+
+Streaming	Apache Kafka
+Processing	Apache Spark 3.4.1
+Orchestration	Apache Airflow
+Storage	Parquet Data Lake
+Analytics DB	PostgreSQL 15
+Visualization	Apache Superset
+Infrastructure	Docker & Docker Compose
+Key Python Libraries
 
-Python 3
-Apache Kafka
-Apache Spark (Batch & Streaming)
-Apache Airflow
-PostgreSQL
-Apache Superset
-Docker & Docker Compose
-Parquet Data Lake
+pyspark
 
----
+kafka-python
 
-## requirements.txt
+pandas
 
-# Spark
-pyspark==3.4.1
+sqlalchemy
 
-# Kafka
-kafka-python>=2.0
+psycopg2-binary
 
-# Analytics / KPIs
-pandas>=2.0
-sqlalchemy>=2.0
-psycopg2-binary>=2.9
+pyarrow
 
-# Utils
-python-dotenv>=1.0
+🚀 Quick Start
+Prerequisites
 
+Docker Engine 20.10+
 
----
+Docker Compose v2
 
-## How to Run the Project
+8 GB RAM minimum (16 GB recommended)
 
-1️⃣ Start the environment
-	docker compose up -d
+Deployment
+git clone https://github.com/biko2020/smartcity-iot-bigdata-pipeline.git
+cd smartcity-iot-bigdata-pipeline
+docker compose -f docker/docker-compose.yml up -d
 
-2️⃣ Run batch ETL (optional)
-    docker exec -it spark python3 /app/scripts/extract.py
-	docker exec -it spark spark-submit /app/scripts/transform.py
-	docker exec -it spark python3 /app/scripts/load.py
+Verify Services
+docker ps
 
-3️⃣ Run real-time streaming
-	docker exec -it spark spark-submit /app/spark/streaming_job.py
+▶️ Pipeline Execution
+1️⃣ Start IoT data simulation
+docker exec -it smartcity-kafka python3 /app/kafka/producer_iot.py
 
----
+2️⃣ Launch Spark Streaming
+docker exec -it smartcity-spark spark-submit /app/spark/streaming_job.py
 
-## Access Services
+3️⃣ Load KPIs into PostgreSQL
+docker exec -it smartcity-spark python3 /app/scripts/load_postgres.py
 
-| Service    | URL                                            |
-| ---------- | ---------------------------------------------- |
-| Spark UI   | [http://localhost:8080](http://localhost:8080) |
-| Superset   | [http://localhost:8088](http://localhost:8088) |
-| PostgreSQL | localhost:5432                                 |
-| Airflow    | [http://localhost:8081](http://localhost:8081) |
+🌐 Web Interfaces
+Service	URL
+Spark UI	http://localhost:4040
 
----
+Airflow	http://localhost:8080
 
-## Example KPIs
+Superset	http://localhost:8088
+📈 KPIs & Analytics
 
-- Average CO₂ per sensor
-- Temperature trends
-- Traffic congestion index
-- Real-time alerts
-- Sensor health monitoring
+Average temperature per zone
 
----
+Pollution level trends
 
-## This project demonstrates the ability to:
+Traffic density indicators
 
-- Design production-ready Big Data architectures
-- Handle real-time and batch workloads
-- Automate pipelines with Airflow
-- Deliver analytics-ready data to BI tools
-- Deploy everything using Docker
-- Typical freelance missions:
-- Big Data Engineer
-- Streaming Data Architect
-- Spark / Kafka Consultant
-- Data Platform Setup
+Event throughput (msg/sec)
 
----
+Sensor activity & latency
 
-## Author
+🎯 What This Project Proves
+Technical Skills
+
+✔ Kafka streaming ingestion
+✔ Spark Structured Streaming
+✔ Data Lake engineering
+✔ OLAP-ready PostgreSQL modeling
+✔ Airflow orchestration
+✔ Dockerized production stack
+
+Freelance-Ready Value
+
+✔ End-to-end delivery
+✔ Scalable architecture
+✔ Client-ready demo
+✔ Cloud migration friendly
+
+💼 Ideal Freelance Use
+
+Perfect for:
+
+Smart City analytics platforms
+
+IoT data pipelines
+
+Real-time dashboards
+
+Kafka / Spark consulting
+
+Data platform MVPs
+
+📞 Contact
 
 AIT OUFKIR BRAHIM
-- Data Engineer | Big Data | Spark | Kafka | Airflow
-    Email: aitoufkirbrahimab@gmail.com
-    GitHub: https://github.com/biko2020
+Big Data Engineer | Spark • Kafka • Airflow
+
+📧 Email: aitoufkirbrahimab@gmail.com
+
+💻 GitHub: https://github.com/biko2020
+
+💼 LinkedIn: https://www.linkedin.com/in/brahim-aitoufkir-74506021a/
+
+📄 License
+
+MIT License
