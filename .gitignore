@@ -1,0 +1,108 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Data Lake & Processed Data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+*.log
+
+# Airflow
+airflow/logs/
+airflow/*.db
+airflow/*.pid
+airflow/*.cfg
+airflow/airflow.db
+airflow/airflow-webserver.pid
+airflow/unittests.cfg
+
+# Checkpoints (Spark Streaming)
+checkpoints/
+*.checkpoint
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Superset
+superset/superset.db
+superset/.superset
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Parquet Files
+*.parquet
+
+# Kafka Data
+kafka-logs/
+zookeeper-data/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# Logs
+logs/
+*.log
+*.out
+
+# OS
+Thumbs.db
+.DS_Store
