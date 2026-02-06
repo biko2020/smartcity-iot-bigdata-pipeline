@@ -1,0 +1,99 @@
+version: "3.9"
+
+networks:
+  smartcity-network:
+    driver: bridge
+
+services:
+  # =====================
+  # PostgreSQL
+  # =====================
+  postgres:
+    image: postgres:15
+    container_name: smartcity-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: smartcity_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - smartcity-network
+
+  # =====================
+  # Kafka (single-node)
+  # =====================
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: smartcity-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      ALLOW_PLAINTEXT_LISTENER: yes
+    ports:
+      - "9092:9092"
+    networks:
+      - smartcity-network
+
+  # =====================
+  # Spark (Streaming)
+  # =====================
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartcity-spark
+    volumes:
+      - ../scripts:/app/scripts
+      - ../data:/app/data
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - "4040:4040"
+    networks:
+      - smartcity-network
+
+  # =====================
+  # Superset
+  # =====================
+  superset:
+    image: apache/superset:latest
+    container_name: smartcity-superset
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: smartcity_secret
+      TALISMAN_ENABLED: "False"
+    depends_on:
+      - postgres
+    networks:
+      - smartcity-network
+
+  # =====================
+  # Airflow (orchestration)
+  # =====================
+  airflow:
+    image: apache/airflow:2.8.1
+    container_name: smartcity-airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/smartcity_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - smartcity-network
+
+volumes:
+  pgdata:
