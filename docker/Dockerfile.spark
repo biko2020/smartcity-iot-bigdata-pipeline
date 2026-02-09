@@ -1,16 +1,12 @@
-FROM bitnami/spark:3.4.1
+FROM apache/spark:3.4.1-python3
 
 USER root
 
-# Install Python dependencies
-RUN pip install --no-cache-dir \
-    pyspark \
-    kafka-python \
-    pandas \
-    pyarrow \
-    sqlalchemy \
-    psycopg2-binary
+# Copy requirements from parent directory
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 WORKDIR /app
 
-USER 1001
+# Switch to non-root user
+USER spark

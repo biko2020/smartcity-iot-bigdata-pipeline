@@ -70,15 +70,15 @@ services:
   # =====================
   spark:
     build:
-      context: ./docker
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile.spark
     container_name: smartcity-spark
     volumes:
-      - ./scripts:/app/scripts
-      - ./spark:/app/spark
-      - ./kafka:/app/kafka
-      - ./data:/app/data
-      - ./checkpoints:/app/checkpoints
+      - ../scripts:/app/scripts
+      - ../spark:/app/spark
+      - ../kafka:/app/kafka
+      - ../data:/app/data
+      - ../checkpoints:/app/checkpoints      
     depends_on:
       kafka:
         condition: service_healthy

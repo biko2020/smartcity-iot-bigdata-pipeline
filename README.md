@@ -96,7 +96,7 @@ smartcity-iot-bigdata-pipeline/
 │       └── smartcity_pipeline.py   # Orchestration
 │
 ├── docker/
-│   ├── Dockerfile
+│   ├── Dockerfile.spark
 │   └── docker-compose.yml
 │
 ├── requirements.txt
