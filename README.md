@@ -37,6 +37,7 @@ Smart Cities • Industry 4.0 • Environmental Monitoring • Traffic Analytics
            │
     ┌──────▼──────────────┐
     │   Apache Kafka      │  ← Real-time ingestion
+    │   + Zookeeper       │
     └──────┬──────────────┘
            │
     ┌──────▼──────────────┐
@@ -96,8 +97,8 @@ smartcity-iot-bigdata-pipeline/
 │       └── smartcity_pipeline.py   # Orchestration
 │
 ├── docker/
-│   ├── Dockerfile.spark
-│   └── docker-compose.yml
+│   ├── Dockerfile.spark            # Spark container image
+│   └── docker-compose.yml          # Multi-service orchestration
 │
 ├── requirements.txt
 └── README.md
@@ -107,23 +108,23 @@ smartcity-iot-bigdata-pipeline/
 
 ## 🛠️ Technology Stack
 
-| Layer              | Technology                |
-|--------------------|---------------------------|
-| **Language**       | Python 3.10+              |
-| **Streaming**      | Apache Kafka              |
-| **Processing**     | Apache Spark 3.4.1        |
-| **Orchestration**  | Apache Airflow            |
-| **Storage**        | Parquet Data Lake         |
-| **Analytics DB**   | PostgreSQL 15             |
-| **Visualization**  | Apache Superset           |
-| **Infrastructure** | Docker & Docker Compose   |
+| Layer              | Technology                      |
+|--------------------|---------------------------------|
+| **Language**       | Python 3.10+                    |
+| **Streaming**      | Apache Kafka 7.5 (Confluent)    |
+| **Processing**     | Apache Spark 3.4.1              |
+| **Orchestration**  | Apache Airflow 2.8.1            |
+| **Storage**        | Parquet Data Lake               |
+| **Analytics DB**   | PostgreSQL 15                   |
+| **Visualization**  | Apache Superset                 |
+| **Infrastructure** | Docker & Docker Compose         |
 
 **Key Python Libraries:**
-- `pyspark`
-- `kafka-python`
-- `pandas`
-- `sqlalchemy`
-- `psycopg2-binary`
+- `pyspark==3.4.1`
+- `kafka-python>=2.0`
+- `pandas>=2.0`
+- `sqlalchemy>=2.0`
+- `psycopg2-binary>=2.9`
 - `pyarrow`
 
 ---
@@ -132,21 +133,26 @@ smartcity-iot-bigdata-pipeline/
 
 ### Prerequisites
 
+- **Docker Desktop** (Windows 11 / macOS / Linux)
 - Docker Engine 20.10+
-- Docker Compose v2
+- Docker Compose v2+
 - 8 GB RAM minimum (16 GB recommended)
+- 10 GB free disk space
 
 ### Deployment
 ```bash
+# Clone the repository
 git clone https://github.com/biko2020/smartcity-iot-bigdata-pipeline.git
 cd smartcity-iot-bigdata-pipeline
+
+# Launch all services
 docker compose -f docker/docker-compose.yml up -d
+
+# Verify services are running
+docker compose -f docker/docker-compose.yml ps
 ```
 
-### Verify Services
-```bash
-docker ps
-```
+**Wait for all services to be healthy** (30-60 seconds)
 
 ---
 
@@ -154,86 +160,127 @@ docker ps
 
 **1️⃣ Start IoT data simulation**
 ```bash
-docker exec -it smartcity-kafka python3 /app/kafka/producer_iot.py
+docker exec -it smartcity-spark python3 /app/kafka/producer_iot.py
 ```
+*Generates synthetic sensor events every 5 seconds*
 
-**2️⃣ Launch Spark Streaming**
+**2️⃣ Launch Spark Streaming** (in a new terminal)
 ```bash
 docker exec -it smartcity-spark spark-submit /app/spark/streaming_job.py
 ```
+*Consumes Kafka events and writes to Parquet*
 
-**3️⃣ Load KPIs into PostgreSQL**
+**3️⃣ Load KPIs into PostgreSQL** (after data collection)
 ```bash
 docker exec -it smartcity-spark python3 /app/scripts/load_postgres.py
+```
+*Aggregates metrics and loads to database*
+
+**4️⃣ Verify data in PostgreSQL**
+```bash
+docker exec -it smartcity-postgres psql -U postgres -d smartcity_db -c "SELECT * FROM smartcity_kpi;"
 ```
 
 ---
 
 ## 🌐 Web Interfaces
 
-| Service      | URL                          |
-|--------------|------------------------------|
-| **Spark UI** | http://localhost:4040        |
-| **Airflow**  | http://localhost:8080        |
-| **Superset** | http://localhost:8088        |
+| Service          | URL                          | Credentials         |
+|------------------|------------------------------|---------------------|
+| **Airflow**      | http://localhost:8080        | `admin` / `admin`   |
+| **Superset**     | http://localhost:8088        | Setup required*     |
+| **Spark UI**     | http://localhost:4040        | N/A (when job runs) |
+
+*Superset setup:
+```bash
+docker exec -it smartcity-superset superset fab create-admin \
+    --username admin --firstname Admin --lastname User \
+    --email admin@example.com --password admin
+docker exec -it smartcity-superset superset db upgrade
+docker exec -it smartcity-superset superset init
+```
 
 ---
 
 ## 📈 KPIs & Analytics
 
-- Average temperature per zone
-- Pollution level trends
-- Traffic density indicators
-- Event throughput (msg/sec)
-- Sensor activity & latency
+The pipeline calculates real-time metrics:
+
+- **Environmental**: Average temperature, CO₂ concentration per sensor
+- **Traffic**: Traffic density indicators, congestion analysis
+- **Operational**: Event throughput (msg/sec), sensor health, data latency
 
 ---
 
-## 🎯 What This Project Proves
+## 🎯 What This Project Demonstrates
 
-### Technical Skills
+### Technical Expertise
 
-✔ Kafka streaming ingestion  
-✔ Spark Structured Streaming  
-✔ Data Lake engineering  
+✔ Real-time stream processing with Kafka & Spark  
+✔ Event-driven architecture design  
+✔ Data lake engineering with Parquet  
 ✔ OLAP-ready PostgreSQL modeling  
-✔ Airflow orchestration  
-✔ Dockerized production stack  
+✔ Workflow automation with Airflow  
+✔ Containerized production deployments  
 
-### Freelance-Ready Value
+### Business Capabilities
 
-✔ End-to-end delivery  
-✔ Scalable architecture  
-✔ Client-ready demo  
-✔ Cloud migration friendly  
+✔ End-to-end pipeline development  
+✔ Scalable architecture for high-velocity data  
+✔ Production-ready monitoring & orchestration  
+✔ Analytics-ready data modeling  
+✔ Cloud-native deployment strategies  
 
 ---
 
-## 💼 Ideal Freelance Use
+## 💼 Ideal For Freelance Projects
 
 **Perfect for:**
 
 - Smart City analytics platforms
-- IoT data pipelines
-- Real-time dashboards
-- Kafka / Spark consulting
-- Data platform MVPs
+- IoT data pipeline implementations
+- Real-time dashboard solutions
+- Kafka / Spark consulting engagements
+- Data platform MVPs and prototypes
+
+**Typical Deliverables:**
+- Custom data ingestion pipelines
+- Real-time analytics platforms
+- Cloud migration strategies (AWS EMR, GCP Dataproc, Azure HDInsight)
+- Performance optimization & tuning
 
 ---
+
+## 🔧 Troubleshooting
+
+**Services not starting?**
+```bash
+docker compose -f docker/docker-compose.yml logs [service-name]
+```
+
+**Reset everything:**
+```bash
+docker compose -f docker/docker-compose.yml down -v
+docker compose -f docker/docker-compose.yml up -d
+```
 
 ## 📞 Contact
 
 **AIT OUFKIR BRAHIM**  
-*Big Data Engineer | Spark • Kafka • Airflow*
+*Big Data Engineer | Spark • Kafka • Airflow Specialist*
 
 📧 **Email:** [aitoufkirbrahimab@gmail.com](mailto:aitoufkirbrahimab@gmail.com)  
 💻 **GitHub:** [@biko2020](https://github.com/biko2020)  
 💼 **LinkedIn:** [brahim-aitoufkir](https://www.linkedin.com/in/brahim-aitoufkir-74506021a/)
+
+**Open to:**
+- Freelance data engineering projects
+- Big Data consulting engagements
+- Technical architecture reviews
+- Cloud migration strategies
 
 ---
 
 ## 📄 License
 
 MIT License
-
----
