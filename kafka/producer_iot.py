@@ -8,6 +8,8 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
+print("🚀 Producer started. Sending events to Kafka...")
+
 # Continuous loop to generate and send IoT sensor data
 while True:
     # Create simulated sensor event with random values
@@ -18,9 +20,11 @@ while True:
         "co2": random.randint(400, 1200),
         "traffic": random.randint(10, 100)
     }
-
+    
     # Send the event to the Kafka topic
     producer.send("smartcity.iot", event)
-
+    
+    print(f"✅ Sent: {event}")  # AJOUTER CETTE LIGNE
+    
     # Wait 5 seconds before sending the next event
     time.sleep(5)
