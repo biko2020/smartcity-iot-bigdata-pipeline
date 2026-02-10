@@ -13,7 +13,7 @@ with DAG(
     # Task 1: Execute Spark streaming job to process Kafka data
     stream = BashOperator(
         task_id="spark_streaming",
-        bash_command="docker exec spark spark-submit /app/spark/streaming_job.py"
+        bash_command="docker exec spark spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 /app/spark/streaming_job.py"
     )
     
     # Task 2: Aggregate sensor data and load KPIs to PostgreSQL
