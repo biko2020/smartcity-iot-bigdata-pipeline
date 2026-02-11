@@ -87,6 +87,7 @@ smartcity-iot-bigdata-pipeline/
 │   └── streaming_job.py            # Spark Structured Streaming
 │
 ├── superset/
+│   ├── Dockerfile.superset         # Superset container image
 │   └── dashboards/
 │
 ├── scripts/
@@ -170,9 +171,7 @@ docker exec -it smartcity-spark python3 /app/kafka/producer_iot.py
 
 **Terminal 2: Launch Spark Streaming Job**
 ```bash
-docker exec -it smartcity-spark spark-submit \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
-  /app/spark/streaming_job.py
+docker exec -it smartcity-spark spark-submit /app/spark/streaming_job.py
 ```
 *Consumes Kafka events, processes stream, writes to Parquet*
 
@@ -212,7 +211,7 @@ Login: admin / admin
 - Click **"Trigger DAG"** button for immediate execution
 
 **Step 4: Monitor Execution**
-- View task status in Graph View or Grid View
+- View task status in Graph View
 - Check logs for each task
 - Set up alerts for failures (email/Slack integration)
 
@@ -270,8 +269,9 @@ docker exec -it smartcity-superset superset fab create-admin \
 docker exec -it smartcity-superset superset db upgrade
 docker exec -it smartcity-superset superset init
 ```
+**Use the connection string to connect Superset to Postgres:** 
+postgresql://postgres:postgres@smartcity-postgres:5432/smartcity_db# 
 
----
 
 ## 📈 KPIs & Analytics
 

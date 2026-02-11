@@ -94,6 +94,9 @@ services:
   # Superset
   # =====================
   superset:
+    build:
+      context: ..
+      dockerfile: superset/Dockerfile.superset
     image: apache/superset:latest
     container_name: smartcity-superset
     ports:

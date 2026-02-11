@@ -1,0 +1,9 @@
+FROM apache/superset:latest
+
+USER root
+
+# Installer support PostgreSQL complet
+RUN pip install --upgrade pip \
+    && pip install "apache-superset[postgres]"
+
+USER superset
