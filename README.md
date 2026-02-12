@@ -270,7 +270,7 @@ docker exec -it smartcity-superset superset db upgrade
 docker exec -it smartcity-superset superset init
 ```
 **Use the connection string to connect Superset to Postgres:** 
-postgresql://postgres:postgres@smartcity-postgres:5432/smartcity_db# 
+postgresql://postgres:postgres@smartcity-postgres:5432/smartcity_db
 
 
 ## 📈 KPIs & Analytics

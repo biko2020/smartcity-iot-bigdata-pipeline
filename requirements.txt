@@ -1,7 +1,14 @@
+# Spark & Streaming
 pyspark==3.4.1
 kafka-python>=2.0
+
+# Data Processing
 pandas>=2.0
+pyarrow>=12.0
+
+# Database
 sqlalchemy>=2.0
 psycopg2-binary>=2.9
+
+# Utils
 python-dotenv>=1.0
-pyarrow>=12.0

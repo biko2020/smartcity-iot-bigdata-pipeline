@@ -97,7 +97,7 @@ services:
     build:
       context: ..
       dockerfile: superset/Dockerfile.superset
-    image: apache/superset:latest
+    image: smartcity-superset:latest
     container_name: smartcity-superset
     ports:
       - "8088:8088"
