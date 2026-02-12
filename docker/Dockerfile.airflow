@@ -1,0 +1,7 @@
+FROM apache/airflow:2.8.1
+
+USER root
+# Install Docker CLI so Airflow can run `docker exec` inside BashOperator
+RUN apt-get update && apt-get install -y docker.io
+# Switch back to airflow
+USER airflow

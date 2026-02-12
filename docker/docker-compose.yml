@@ -130,7 +130,10 @@ services:
   # Airflow Init
   # =====================
   airflow-init:
-    image: apache/airflow:2.8.1
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    image: smartcity-airflow:latest
     container_name: smartcity-airflow-init
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -160,7 +163,10 @@ services:
   # Airflow Webserver
   # =====================
   airflow-webserver:
-    image: apache/airflow:2.8.1
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    image: smartcity-airflow:latest
     container_name: smartcity-airflow-webserver
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -170,6 +176,7 @@ services:
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8080:8080"
     depends_on:
@@ -190,7 +197,10 @@ services:
   # Airflow Scheduler
   # =====================
   airflow-scheduler:
-    image: apache/airflow:2.8.1
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    image: smartcity-airflow:latest
     container_name: smartcity-airflow-scheduler
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -199,6 +209,7 @@ services:
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../airflow/logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       airflow-init:
         condition: service_completed_successfully

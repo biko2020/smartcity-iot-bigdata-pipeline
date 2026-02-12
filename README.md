@@ -99,6 +99,7 @@ smartcity-iot-bigdata-pipeline/
 │
 ├── docker/
 │   ├── Dockerfile.spark            # Spark container image
+│   ├── Dockerfile.airflow          # airflow container image
 │   └── docker-compose.yml          # Multi-service orchestration
 │
 ├── requirements.txt
