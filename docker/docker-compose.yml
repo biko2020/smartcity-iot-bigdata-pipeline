@@ -66,6 +66,22 @@ services:
       retries: 5
 
   # =====================
+  # kafka-producer
+  # =====================
+  kafka-producer:
+    image: docker-spark
+    container_name: smartcity-producer
+    command: python3 /app/kafka/producer_iot.py
+    volumes:
+      - ../kafka:/app/kafka
+    depends_on:
+      - kafka
+    networks:
+      - smartcity-network
+    restart: unless-stopped
+   
+
+  # =====================
   # Spark (Streaming)
   # =====================
   spark:
@@ -125,8 +141,8 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: admin
       _AIRFLOW_WWW_USER_PASSWORD: admin
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/logs:/opt/airflow/logs
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -152,8 +168,8 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/logs:/opt/airflow/logs
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
     ports:
       - "8080:8080"
     depends_on:
@@ -181,8 +197,8 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@postgres:5432/smartcity_db
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/logs:/opt/airflow/logs
+      - ../airflow/dags:/opt/airflow/dags
+      - ../airflow/logs:/opt/airflow/logs
     depends_on:
       airflow-init:
         condition: service_completed_successfully

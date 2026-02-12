@@ -264,7 +264,7 @@ docker compose -f docker/docker-compose.yml up -d kafka-producer
 ```bash
 docker exec -it smartcity-superset superset fab create-admin \
     --username admin --firstname Admin --lastname User \
-    --email admin@example.com --password admin
+    --email aitoufkirbrahimab@gmail.com --password admin
 
 docker exec -it smartcity-superset superset db upgrade
 docker exec -it smartcity-superset superset init

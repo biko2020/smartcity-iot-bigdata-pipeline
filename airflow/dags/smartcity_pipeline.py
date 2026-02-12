@@ -13,13 +13,13 @@ with DAG(
     # Task 1: Execute Spark streaming job to process Kafka data
     stream = BashOperator(
         task_id="spark_streaming",
-        bash_command="docker exec spark spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 /app/spark/streaming_job.py"
+        bash_command="docker exec smartcity-spark spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 /app/spark/streaming_job.py"
     )
     
     # Task 2: Aggregate sensor data and load KPIs to PostgreSQL
     load_kpi = BashOperator(
         task_id="load_postgres",
-        bash_command="docker exec spark python3 /app/scripts/load_postgres.py"
+        bash_command="docker exec smartcity-spark python3 /app/scripts/load_postgres.py"
     )
     
     # Define task dependencies: streaming must complete before loading KPIs
