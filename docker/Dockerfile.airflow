@@ -1,7 +1,14 @@
 FROM apache/airflow:2.8.1
 
 USER root
-# Install Docker CLI so Airflow can run `docker exec` inside BashOperator
-RUN apt-get update && apt-get install -y docker.io
-# Switch back to airflow
+
+# Install latest Docker CLI from official Docker repo
+RUN apt-get update && \
+    apt-get install -y curl gnupg lsb-release && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+      > /etc/apt/sources.list.d/docker.list && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli
+
 USER airflow

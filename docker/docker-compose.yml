@@ -94,7 +94,8 @@ services:
       - ../spark:/app/spark
       - ../kafka:/app/kafka
       - ../data:/app/data
-      - ../checkpoints:/app/checkpoints      
+      - ../checkpoints:/app/checkpoints
+      - spark-ivy:/home/spark/.ivy2      
     depends_on:
       kafka:
         condition: service_healthy
@@ -221,3 +222,4 @@ services:
 
 volumes:
   pgdata:
+  spark-ivy:
