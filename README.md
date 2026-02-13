@@ -94,6 +94,9 @@ smartcity-iot-bigdata-pipeline/
 │   └── load_postgres.py            # KPIs from Parquet → PostgreSQL
 │
 ├── airflow/
+│   └── dashboards/
+│   │   ├── dag_list.png            # DAGs list view
+│   │   └── dag_graph.png           # DAG graph view
 │   └── dags/
 │       └── smartcity_pipeline.py   # Orchestration
 │
@@ -301,9 +304,26 @@ SELECT
     events_count
 FROM smartcity_kpi
 ORDER BY events_count DESC;
+
 ```
+## 📊 Airflow Dashboard
+
+To illustrate the orchestration of the SmartCity IoT pipeline, here are screenshots from the Airflow UI:
+
+  <p align="center">
+    <img src="airflow/dashboards/dag_list.png" alt="Airflow DAGs List" width="600"/>
+  </p>
+
+  <p align="center">
+    <img src="airflow/dashboards/dag_graph.png" alt="Airflow DAG Graph View" width="600"/>
+  </p>
+
+These views demonstrate:
+- The **DAGs list** showing the `smartcity_iot_pipeline` enabled and scheduled.
+- The **Graph view** showing task dependencies (`spark_streaming` → `load_postgres`) and their execution status.
 
 ---
+
 
 ## 🎯 What This Project Demonstrates
 
