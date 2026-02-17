@@ -39,10 +39,11 @@ parsed = df.select(
 query = (
     parsed.writeStream
     .format("parquet")
-    .option("path", args.output)                # dynamic output path
-    .option("checkpointLocation", args.checkpoint)  # dynamic checkpoint path
+    .option("path", args.output)
+    .option("checkpointLocation", args.checkpoint)
     .outputMode("append")
+    .trigger(processingTime="30 seconds")
     .start()
 )
 
-query.awaitTermination()
+query.awaitTermination(60)  # run for 60 seconds then exit

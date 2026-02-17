@@ -80,6 +80,8 @@ smartcity-iot-bigdata-pipeline/
 │   ├── raw/                        # Kafka landing (optional)
 │   └── processed/                  # Parquet from Spark Streaming
 │
+├── checkpoints/                    
+│
 ├── kafka/
 │   └── producer_iot.py             # IoT / sensor simulator
 │
