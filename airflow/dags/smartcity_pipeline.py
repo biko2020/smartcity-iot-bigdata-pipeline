@@ -7,7 +7,7 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     schedule_interval="@hourly",
     catchup=False,
-    max_active_runs=1   # prevent overlapping runs
+    max_active_runs=1
 ) as dag:
 
     # Task 1: Run Spark streaming job with dynamic checkpoint/output paths
@@ -16,8 +16,8 @@ with DAG(
         bash_command=(
             "docker exec smartcity-spark spark-submit "
             "/app/spark/streaming_job.py "
-            "--checkpoint /app/checkpoints/{{ ds }} "
-            "--output /app/data/processed/smartcity/{{ ds }}"
+            "--checkpoint /app/checkpoints/{{ ds }}/{{ execution_date.hour }} "
+            "--output /app/data/processed/smartcity/{{ ds }}/{{ execution_date.hour }}"
         )
     )
 
@@ -27,5 +27,4 @@ with DAG(
         bash_command="docker exec smartcity-spark python3 /app/scripts/load_postgres.py"
     )
 
-    # Dependencies
     stream >> load_kpi
