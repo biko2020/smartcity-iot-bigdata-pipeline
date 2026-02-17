@@ -10,7 +10,7 @@ with DAG(
     max_active_runs=1
 ) as dag:
 
-    # Task 1: Run Spark streaming job with dynamic checkpoint/output paths
+    # Task 1: Batch read from Kafka → Write to Parquet
     stream = BashOperator(
         task_id="spark_streaming",
         bash_command=(
@@ -21,10 +21,13 @@ with DAG(
         )
     )
 
-    # Task 2: Load KPIs into Postgres
+    # Task 2: Load KPIs into PostgreSQL
     load_kpi = BashOperator(
         task_id="load_postgres",
-        bash_command="docker exec smartcity-spark python3 /app/scripts/load_postgres.py"
+        bash_command=(
+            "docker exec smartcity-spark python3 /app/scripts/load_postgres.py "
+            "--input /app/data/processed/smartcity/{{ ds }}/{{ execution_date.hour }}"
+        )
     )
 
     stream >> load_kpi

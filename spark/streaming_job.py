@@ -5,14 +5,15 @@ from pyspark.sql.types import *
 
 # Parse arguments for dynamic paths
 parser = argparse.ArgumentParser()
-parser.add_argument("--checkpoint", required=True, help="Checkpoint directory")
-parser.add_argument("--output", required=True, help="Output directory for Parquet")
+parser.add_argument("--checkpoint", required=True)
+parser.add_argument("--output", required=True)
 args = parser.parse_args()
 
 # Initialize Spark session
 spark = SparkSession.builder.appName("SmartCityStreaming").getOrCreate()
+spark.sparkContext.setLogLevel("WARN")
 
-# Define schema for incoming IoT sensor data
+# Define schema
 schema = StructType([
     StructField("sensor_id", StringType()),
     StructField("timestamp", StringType()),
@@ -21,29 +22,32 @@ schema = StructType([
     StructField("traffic", IntegerType())
 ])
 
-# Create streaming DataFrame by reading from Kafka topic
+# Read from Kafka in BATCH mode
 df = (
-    spark.readStream
+    spark.read                                          # ← Batch read
     .format("kafka")
     .option("kafka.bootstrap.servers", "kafka:9092")
     .option("subscribe", "smartcity.iot")
+    .option("startingOffsets", "earliest")             # ← Lire depuis le début
+    .option("endingOffsets", "latest")                 # ← Jusqu'au dernier message
     .load()
 )
 
-# Parse JSON data from Kafka messages and extract fields
+# Parse JSON
 parsed = df.select(
     from_json(col("value").cast("string"), schema).alias("data")
 ).select("data.*")
 
-# Write processed stream to Parquet files with dynamic paths
-query = (
-    parsed.writeStream
-    .format("parquet")
-    .option("path", args.output)
-    .option("checkpointLocation", args.checkpoint)
-    .outputMode("append")
-    .trigger(processingTime="30 seconds")
-    .start()
-)
+# Filter dummy records
+parsed = parsed.filter(col("sensor_id") != "DUMMY-INIT")
 
-query.awaitTermination(60)  # run for 60 seconds then exit
+# Write to Parquet in BATCH mode
+parsed.write \                                         # ← Batch write
+    .format("parquet") \
+    .mode("append") \
+    .save(args.output)
+
+print(f"✅ Data written to {args.output}")
+print(f"✅ Total records: {parsed.count()}")
+
+spark.stop()
