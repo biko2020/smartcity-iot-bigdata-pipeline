@@ -24,12 +24,13 @@ schema = StructType([
 
 # Read from Kafka in BATCH mode
 df = (
-    spark.read                                          # ← Batch read
+    spark.read
     .format("kafka")
     .option("kafka.bootstrap.servers", "kafka:9092")
     .option("subscribe", "smartcity.iot")
-    .option("startingOffsets", "earliest")             # ← Lire depuis le début
-    .option("endingOffsets", "latest")                 # ← Jusqu'au dernier message
+    .option("startingOffsets", "earliest")
+    .option("endingOffsets", "latest")
+    .option("failOnDataLoss", "false")
     .load()
 )
 
@@ -41,11 +42,8 @@ parsed = df.select(
 # Filter dummy records
 parsed = parsed.filter(col("sensor_id") != "DUMMY-INIT")
 
-# Write to Parquet in BATCH mode
-parsed.write \                                         # ← Batch write
-    .format("parquet") \
-    .mode("append") \
-    .save(args.output)
+# Write to Parquet (SANS backslash)
+parsed.write.format("parquet").mode("append").save(args.output)
 
 print(f"✅ Data written to {args.output}")
 print(f"✅ Total records: {parsed.count()}")
