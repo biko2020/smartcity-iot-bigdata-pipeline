@@ -15,6 +15,7 @@ with DAG(
         task_id="spark_streaming",
         bash_command=(
             "docker exec smartcity-spark spark-submit "
+            "--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 "  # ← Ajouter cette ligne
             "/app/spark/streaming_job.py "
             "--checkpoint /app/checkpoints/{{ ds }}/{{ execution_date.hour }} "
             "--output /app/data/processed/smartcity/{{ ds }}/{{ execution_date.hour }}"
