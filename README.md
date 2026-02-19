@@ -1,3 +1,4 @@
+
 # 🏙️ SmartCity IoT Big Data Pipeline
 
 > **Production-grade real-time data platform for Smart Cities & Industry 4.0**
@@ -80,7 +81,7 @@ smartcity-iot-bigdata-pipeline/
 │   ├── raw/                        # Kafka landing (optional)
 │   └── processed/                  # Parquet from Spark Streaming
 │
-├── checkpoints/                    
+├── checkpoints/                    # Spark streaming checkpoints
 │
 ├── kafka/
 │   └── producer_iot.py             # IoT / sensor simulator
@@ -90,13 +91,20 @@ smartcity-iot-bigdata-pipeline/
 │
 ├── superset/
 │   ├── Dockerfile.superset         # Superset container image
-│   └── dashboards/
+│   └── docs/                       # Dashboard screenshots
+│       └── screenshots/
+│           ├── dashboard-overview.png
+│           ├── kpi-cards.png  
+│           ├── co2-bar-chart.png 
+│           ├── air-quality-gauge.png  
+│           ├── event-distribution-pie.png           
+│           └── sensor-table.png    
 │
 ├── scripts/
 │   └── load_postgres.py            # KPIs from Parquet → PostgreSQL
 │
 ├── airflow/
-│   └── dashboards/
+│   ├── dashboards/
 │   │   ├── dag_list.png            # DAGs list view
 │   │   └── dag_graph.png           # DAG graph view
 │   └── dags/
@@ -104,8 +112,11 @@ smartcity-iot-bigdata-pipeline/
 │
 ├── docker/
 │   ├── Dockerfile.spark            # Spark container image
-│   ├── Dockerfile.airflow          # airflow container image
 │   └── docker-compose.yml          # Multi-service orchestration
+│
+├── sql/
+│   └── migrations/
+│       └── 001_sensor_summary.sql  # PostgreSQL views
 │
 ├── requirements.txt
 └── README.md
@@ -123,7 +134,7 @@ smartcity-iot-bigdata-pipeline/
 | **Orchestration**  | Apache Airflow 2.8.1            |
 | **Storage**        | Parquet Data Lake               |
 | **Analytics DB**   | PostgreSQL 15                   |
-| **Visualization**  | Apache Superset                 |
+| **Visualization**  | Apache Superset 3.x             |
 | **Infrastructure** | Docker & Docker Compose         |
 
 **Key Python Libraries:**
@@ -217,7 +228,7 @@ Login: admin / admin
 - Click **"Trigger DAG"** button for immediate execution
 
 **Step 4: Monitor Execution**
-- View task status in Graph View
+- View task status in Graph View or Grid View
 - Check logs for each task
 - Set up alerts for failures (email/Slack integration)
 
@@ -236,25 +247,16 @@ Login: admin / admin
 
 ### 🔄 Continuous Producer
 
-For 24/7 data generation, add a dedicated producer service in `docker-compose.yml`:
+The pipeline includes a dedicated Kafka producer service for 24/7 data generation:
 ```yaml
-  kafka-producer:
-    image: docker-spark
-    container_name: smartcity-producer
-    command: python3 /app/kafka/producer_iot.py
-    volumes:
-      - ../kafka:/app/kafka
-    depends_on:
-      - kafka
-    networks:
-      - smartcity-network
-    restart: unless-stopped
+kafka-producer:
+  image: docker-spark
+  container_name: smartcity-producer
+  command: python3 /app/kafka/producer_iot.py
+  restart: unless-stopped
 ```
 
-Then start it:
-```bash
-docker compose -f docker/docker-compose.yml up -d kafka-producer
-```
+This service automatically starts with the platform and continuously generates IoT sensor events.
 
 ---
 
@@ -263,40 +265,53 @@ docker compose -f docker/docker-compose.yml up -d kafka-producer
 | Service          | URL                          | Credentials            |
 |------------------|------------------------------|------------------------|
 | **Airflow**      | http://localhost:8080        | `admin` / `admin`      |
+| **Superset**     | http://localhost:8088        | `admin` / `admin123`   |
 | **Spark UI**     | http://localhost:4040        | N/A (active when running) |
-| **Superset**     | http://localhost:8088        | Setup required*        |
+| **PostgreSQL**   | `localhost:5433`             | `postgres` / `postgres` |
 
-**Superset Initial Setup:**
+### Initial Setup
+
+**Superset:**
 ```bash
+# Create admin user
 docker exec -it smartcity-superset superset fab create-admin \
     --username admin --firstname Admin --lastname User \
-    --email aitoufkirbrahimab@gmail.com --password admin
+    --email admin@smartcity.com --password admin123
 
+# Initialize database
 docker exec -it smartcity-superset superset db upgrade
+
+# Load examples (optional)
 docker exec -it smartcity-superset superset init
 ```
-**Use the connection string to connect Superset to Postgres:** 
-postgresql://postgres:postgres@smartcity-postgres:5432/smartcity_db
 
+**Connect Superset to PostgreSQL:**
+```
+postgresql://postgres:postgres@smartcity-postgres:5432/smartcity_db
+```
+
+---
 
 ## 📈 KPIs & Analytics
 
 The pipeline calculates real-time metrics:
 
-- **Environmental Metrics**
-  - Average temperature per sensor/zone
-  - CO₂ concentration trends
-  
-- **Traffic Analytics**
-  - Traffic density indicators
-  - Congestion patterns and peak hours
-  
-- **Operational KPIs**
-  - Event throughput (messages/second)
-  - Sensor health monitoring
-  - Data processing latency
+### Environmental Metrics
+- Average temperature per sensor/zone
+- CO₂ concentration trends
 
-**Sample Query:**
+### Traffic Analytics
+- Traffic density indicators
+- Congestion patterns and peak hours
+
+### Operational KPIs
+- Event throughput (messages/second)
+- Sensor health monitoring
+- Data processing latency
+
+### Sample Queries
+
+**Current KPIs:**
 ```sql
 SELECT 
     sensor_id,
@@ -306,26 +321,151 @@ SELECT
     events_count
 FROM smartcity_kpi
 ORDER BY events_count DESC;
-
 ```
-## 📊 Airflow Dashboard
 
-To illustrate the orchestration of the SmartCity IoT pipeline, here are screenshots from the Airflow UI:
-
-  <p align="center">
-    <img src="airflow/dashboards/dag_list.png" alt="Airflow DAGs List" width="600"/>
-  </p>
-
-  <p align="center">
-    <img src="airflow/dashboards/dag_graph.png" alt="Airflow DAG Graph View" width="600"/>
-  </p>
-
-These views demonstrate:
-- The **DAGs list** showing the `smartcity_iot_pipeline` enabled and scheduled.
-- The **Graph view** showing task dependencies (`spark_streaming` → `load_postgres`) and their execution status.
+**Sensor Summary:**
+```sql
+SELECT * FROM sensor_summary;
+```
 
 ---
 
+## 📊 Business Intelligence Dashboard
+
+### Overview
+
+Professional Superset dashboard providing real-time insights into Smart City IoT operations with actionable KPIs and trends.
+
+**Access:** http://localhost:8088  
+**Credentials:** `admin` / `admin123`
+
+<p align="center">
+  <img src="superset/docs/screenshots/dashboard-overview.png" alt="Dashboard Overview" width="800"/>
+</p>
+
+### Dashboard Features
+
+#### 🎯 Key Performance Indicators
+
+<p align="center">
+  <img src="superset/docs/screenshots/kpi-cards.png" alt="KPI Cards" width="800"/>
+</p>
+
+| Metric | Description | Business Value |
+|--------|-------------|----------------|
+| **Average Temperature** | Environmental monitoring | Identify heat islands and climate patterns |
+| **CO₂ Levels** | Air quality tracking (ppm) | Urban health and pollution control |
+| **Traffic Density** | Vehicle count per sensor | Congestion management and route optimization |
+| **Total Events** | Pipeline throughput | System health and data volume monitoring |
+
+#### 📈 Visualizations
+
+**CO₂ Analysis by Sensor**
+
+<p align="center">
+  <img src="superset/docs/screenshots/co2-bar-chart.png" alt="CO2 Bar Chart" width="600"/>
+</p>
+
+- Compare air quality across deployment zones
+- Identify pollution hotspots
+- Support environmental policy decisions
+
+**Air Quality Gauge**
+
+<p align="center">
+  <img src="superset/docs/screenshots/air-quality-gauge.png" alt="Air Quality Gauge" width="400"/>
+</p>
+
+- Quick status assessment
+  - **Good**: 400-600 ppm (Green)
+  - **Moderate**: 600-800 ppm (Yellow)
+  - **Poor**: 800-1200 ppm (Red)
+
+**Event Distribution**
+
+<p align="center">
+  <img src="superset/docs/screenshots/event-distribution-pie.png" alt="Event Distribution" width="500"/>
+</p>
+
+- Sensor activity monitoring
+- Load balancing insights
+- Data volume distribution
+
+**Sensor Details Table**
+
+<p align="center">
+  <img src="superset/docs/screenshots/sensor-table.png" alt="Sensor Table" width="700"/>
+</p>
+
+- Comprehensive sensor metrics
+- Sortable and filterable
+- Export to CSV/Excel
+
+### Setup Instructions
+```bash
+# Initialize Superset
+docker exec -it smartcity-superset superset fab create-admin \
+    --username admin --password admin123 \
+    --firstname Admin --lastname User \
+    --email admin@smartcity.com
+
+docker exec -it smartcity-superset superset db upgrade
+docker exec -it smartcity-superset superset init
+
+# Create PostgreSQL view for aggregations
+docker exec -it smartcity-postgres psql -U postgres -d smartcity_db << EOF
+CREATE OR REPLACE VIEW sensor_summary AS
+SELECT 
+    sensor_id,
+    AVG(avg_temperature) as avg_temp,
+    AVG(avg_co2) as avg_co2,
+    AVG(avg_traffic) as avg_traffic,
+    SUM(events_count) as total_events
+FROM smartcity_kpi
+GROUP BY sensor_id;
+EOF
+
+# Access dashboard: http://localhost:8088
+```
+
+### Advanced Features
+
+- **Auto-refresh**: 5-minute intervals for near real-time data
+- **Interactive Filters**: Sensor selection, date ranges, drill-downs
+- **Export Options**: PDF, PNG, CSV for reporting
+- **Mobile Responsive**: Accessible on tablets and smartphones
+- **Role-Based Access**: Admin, Analyst, Viewer permissions
+
+### 💼 Skills Demonstrated
+
+✅ **Apache Superset** - Dashboard design and chart creation  
+✅ **PostgreSQL Views** - SQL optimization for BI  
+✅ **Data Visualization** - Chart selection, color theory, UX design  
+✅ **Business Intelligence** - KPI definition and metric tracking  
+✅ **Stakeholder Communication** - Translating technical data into actionable insights  
+
+---
+
+## 🔄 Airflow Orchestration
+
+The pipeline uses Apache Airflow for automated workflow management and scheduling.
+
+<p align="center">
+  <img src="airflow/dashboards/dag_list.png" alt="Airflow DAGs List" width="700"/>
+</p>
+
+<p align="center">
+  <img src="airflow/dashboards/dag_graph.png" alt="Airflow DAG Graph View" width="700"/>
+</p>
+
+**Key Features:**
+- **DAG Visualization**: Clear task dependencies and execution flow
+- **Automated Scheduling**: Hourly runs with configurable intervals
+- **Error Handling**: Automatic retries and failure alerts
+- **Centralized Logging**: Track all pipeline executions
+- **Manual Triggers**: On-demand pipeline execution
+
+---
 
 ## 🎯 What This Project Demonstrates
 
@@ -336,6 +476,7 @@ These views demonstrate:
 ✔ **Data lake engineering** with columnar Parquet format  
 ✔ **OLAP-ready data modeling** in PostgreSQL  
 ✔ **Workflow orchestration** with Airflow DAGs  
+✔ **Business Intelligence** dashboards with Superset  
 ✔ **Containerized deployments** using Docker Compose  
 ✔ **Production vs Development** environment management  
 
@@ -367,6 +508,7 @@ These views demonstrate:
 - Cloud migration strategies (AWS EMR, GCP Dataproc, Azure HDInsight)
 - Performance optimization & tuning
 - Data governance frameworks
+- BI dashboard development
 - Training and knowledge transfer
 
 ---
@@ -384,12 +526,16 @@ docker compose -f docker/docker-compose.yml restart airflow-scheduler
 docker logs smartcity-airflow-scheduler
 ```
 
+**Superset database locked?**
+```bash
+docker compose -f docker/docker-compose.yml restart superset
+docker exec -it smartcity-superset superset db upgrade
+```
+
 **Spark job failing with Kafka connector error?**
 ```bash
-# Ensure Kafka JARs are included in spark-submit
-docker exec -it smartcity-spark spark-submit \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
-  /app/spark/streaming_job.py
+# Ensure Kafka JARs are included
+docker exec -it smartcity-spark ls /opt/spark/jars/ | findstr kafka
 ```
 
 **Reset everything:**
@@ -414,7 +560,7 @@ docker exec -it smartcity-postgres psql -U postgres -d smartcity_db \
 ## 📞 Contact
 
 **AIT OUFKIR BRAHIM**  
-*Big Data Engineer | Spark • Kafka • Airflow Specialist*
+*Big Data Engineer | Spark • Kafka • Airflow • Superset Specialist*
 
 📧 **Email:** [aitoufkirbrahimab@gmail.com](mailto:aitoufkirbrahimab@gmail.com)  
 💻 **GitHub:** [@biko2020](https://github.com/biko2020)  
@@ -423,6 +569,7 @@ docker exec -it smartcity-postgres psql -U postgres -d smartcity_db \
 **Open to:**
 - Freelance data engineering projects
 - Big Data consulting engagements
+- BI dashboard development
 - Technical architecture reviews
 - Cloud migration strategies
 - Team training and mentorship
