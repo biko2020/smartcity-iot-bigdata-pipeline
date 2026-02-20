@@ -88,12 +88,20 @@ smartcity-iot-bigdata-pipeline/
 │
 ├── spark/
 │   └── streaming_job.py            # Spark Structured Streaming
+│   └── docs/                      
+│       └── screenshots/
+│           ├── spark-ui-jobs.png
+│           ├── spark-ui-stages.png 
+│           ├── spark-ui-sql-tab.png
+│           ├── spark-ui-streaming.png 
+│           ├── spark-ui-environment.png          
+│           └── spark-ui-executors.png 
 │
 ├── superset/
 │   ├── Dockerfile.superset         # Superset container image
 │   └── docs/                       # Dashboard screenshots
 │       └── screenshots/
-│           ├── dashboard-overview.png
+│           ├── dashboard-overview.jpg
 │           ├── kpi-cards.png  
 │           ├── co2-bar-chart.png 
 │           ├── air-quality-gauge.png  
@@ -262,12 +270,12 @@ This service automatically starts with the platform and continuously generates I
 
 ## 🌐 Web Interfaces
 
-| Service          | URL                          | Credentials            |
-|------------------|------------------------------|------------------------|
-| **Airflow**      | http://localhost:8080        | `admin` / `admin`      |
-| **Superset**     | http://localhost:8088        | `admin` / `admin123`   |
-| **Spark UI**     | http://localhost:4040        | N/A (active when running) |
-| **PostgreSQL**   | `localhost:5433`             | `postgres` / `postgres` |
+| Service          | URL                          | Credentials            | Status |
+|------------------|------------------------------|------------------------|--------|
+| **Airflow**      | http://localhost:8080        | `admin` / `admin`      | Always on |
+| **Superset**     | http://localhost:8088        | `admin` / `admin123`   | Always on |
+| **Spark UI**     | http://localhost:4040        | N/A                    | When job running |
+| **PostgreSQL**   | `localhost:5433`             | `postgres` / `postgres`| Always on |
 
 ### Initial Setup
 
@@ -340,7 +348,7 @@ Professional Superset dashboard providing real-time insights into Smart City IoT
 **Credentials:** `admin` / `admin123`
 
 <p align="center">
-  <img src="superset/docs/screenshots/dashboard-overview.png" alt="Dashboard Overview" width="800"/>
+  <img src="superset/docs/screenshots/dashboard-overview.jpg" alt="Dashboard Overview" width="800"/>
 </p>
 
 ### Dashboard Features
@@ -466,6 +474,100 @@ The pipeline uses Apache Airflow for automated workflow management and schedulin
 - **Manual Triggers**: On-demand pipeline execution
 
 ---
+
+## ⚡ Spark Processing Monitoring
+
+Apache Spark provides a comprehensive web UI for monitoring job execution, performance metrics, and resource utilization.
+
+**Access:** http://localhost:4040 
+
+<p align="center">
+  <img src="spark/docs/screenshots/spark-ui-jobs.png" alt="Spark Jobs Overview" width="800"/>
+</p>
+
+### Key Monitoring Features
+
+#### 📊 Jobs Overview
+
+<p align="center">
+  <img src="spark/docs/screenshots/spark-ui-sql-tab.png" alt="Spark SQL Tab" width="700"/>
+</p>
+
+- **Active Jobs**: Currently executing streaming queries
+- **Completed Jobs**: Historical job execution data
+- **Job Duration**: Processing time per micro-batch
+- **Task Metrics**: Success/failure rates
+
+#### 🔍 Stages & Tasks
+
+<p align="center">
+  <img src="spark/docs/screenshots/spark-ui-stages.png" alt="Spark Stages" width="700"/>
+</p>
+
+- **Stage DAG**: Visual representation of job execution plan
+- **Task Distribution**: Parallelism and data skew analysis
+- **Shuffle Metrics**: Network I/O performance
+- **Executor Metrics**: CPU, memory, and disk usage
+
+#### 📈 Streaming Statistics
+
+<p align="center">
+  <img src="spark/docs/screenshots/spark-ui-streaming.png" alt="Spark Streaming" width="700"/>
+</p>
+
+- **Input Rate**: Messages/second from Kafka
+- **Processing Time**: Batch processing duration
+- **Scheduling Delay**: Queue time before execution
+- **Total Delay**: End-to-end latency
+
+#### ⚙️ Environment & Configuration
+
+<p align="center">
+  <img src="spark/docs/screenshots/spark-ui-environment.png" alt="Spark Environment" width="700"/>
+</p>
+
+- **Spark Properties**: Configuration parameters
+- **System Properties**: JVM settings
+- **Classpath Entries**: Dependencies and JARs
+
+### Performance Optimization Insights
+
+**From Spark UI, you can identify:**
+
+✅ **Bottlenecks**: Slow stages and skewed tasks  
+✅ **Memory Issues**: OOM errors and GC pressure  
+✅ **Network Overhead**: Excessive shuffle operations  
+✅ **Resource Utilization**: Executor allocation efficiency  
+
+### Sample Metrics
+
+**Typical Streaming Job:**
+```
+Input Rate:        ~200 records/sec
+Processing Time:   ~1.5 seconds/batch
+Scheduling Delay:  <500ms
+Total Delay:       ~2 seconds
+```
+
+**Performance Tuning:**
+- Batch Interval: Adjusted based on input rate
+- Parallelism: Configured for optimal task distribution
+- Memory: Tuned for shuffle and storage operations
+
+### 💡 Pro Tips
+
+**Access Spark History Server :**
+```bash
+# Enable history server in docker-compose.yml
+docker exec -it smartcity-spark /opt/spark/sbin/start-history-server.sh
+# Access: http://localhost:18080
+```
+
+**Monitor live streaming:**
+```bash
+# Watch streaming statistics in real-time
+curl http://localhost:4040/api/v1/applications/[app-id]/streaming/statistics
+```
 
 ## 🎯 What This Project Demonstrates
 
